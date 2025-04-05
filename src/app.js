@@ -63,13 +63,15 @@ app.delete('/user', async (req, res) => {
 app.patch("/user", async (req, res) => {
     const data = req.body;
     const userEmail = req.body.emailId;
-    console.log(userEmail);
+    // console.log(userEmail);
     try {
-        const userUpdate = await User.findOneAndUpdate({ emailId: userEmail }, data)
+        const userUpdate = await User.findOneAndUpdate({ emailId: userEmail }, data, {
+            runValidators:true,  //it is used if you have added validation on schema so the validations also start to apply on updated fields else it is not checking the validation if user is already added on database
+        } )
         res.send('user updated successfully')
     }
     catch (err) {
-        res.status(400).send("Something went wrong");
+        res.status(400).send("Can not update user due to" + err.message);
     }
 })
 
