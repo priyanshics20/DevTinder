@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const validator = require('validator')
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -30,12 +31,11 @@ const userSchema = new mongoose.Schema({
         trim: true,
         minLength: [6, "Password must be at least 6 characters"],
         maxLength: [128, "Password cannot exceed 128 characters"], 
-        validate: {
-            validator: function (value) {
-                return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(value);
-            },
-            message: "Password must include at least one letter, one number, and one special character",
-        }, 
+        validate(value) {
+            if (!validator.isStrongPassword(value)) {
+                throw new Error("Enter a strong password"+ value)
+            }
+        },
     },
     age: {
         type: Number,

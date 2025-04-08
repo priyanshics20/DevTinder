@@ -1,19 +1,87 @@
 const express = require('express');
 const connectDB = require('./config/database')
-const app = express();  //instance of class express
 const User = require('./models/user')
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { isStrongPassword } = require('validator');
+const cookieParser = require('cookie-parser');
+
+const app = express();  //instance of class express
 
 app.use(express.json());
+app.use(cookieParser());
 
 // create user 
 app.post('/signup', async (req, res) => {
-    const user = new User(req.body)
     try {
+        const { firstName, emailId, password, ...optionalFields } = req.body;
+
+        // validating password 
+        if (!isStrongPassword(password)) {
+            throw new Error ("Password is not strong enough.")
+        }
+
+        // Encypt the password 
+        const passwordHash = await  bcrypt.hash(password, 10)
+
+        // const user = new User(req.body)
+        const user = new User({firstName:firstName, emailId:emailId , password: passwordHash , ...optionalFields });
         await user.save();
         res.send("User added Successfully");
     }
     catch (err) {
         res.status(400).send("error saving the user" + err.message);
+    }
+})
+
+// login user 
+app.post('/login', async (req, res) => {
+    try {
+        const { emailId, password } = req.body;
+        const user = await User.findOne({ emailId: emailId });
+        if (!user) {
+            throw new Erron("Invalid credentials");
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (isPasswordValid) {
+            // creating a jwt token
+            // never harcode or push secret key to github 
+            const token = jwt.sign({_id: user._id}, "PriyanshiSecretKey",{expiresIn: "1h"})
+            console.log(token)
+            // setting jwt token in cookies 
+            res.cookie("token", token)
+            
+            res.send("LoggedIn Successfully");
+        }
+        else {
+            throw new Erron("Invalid credentials");
+        }    
+    }
+    catch (err) {
+        res.status(400).send("Error " + err.message); 
+    }
+})
+
+app.get("/profile", async (req, res) => {
+    try {
+        const cookie = req.cookies;
+        // getting token from cookie 
+        const { token } = cookie;
+        if (!token) {
+            throw new Error ("Login to your account")
+        }
+        const decodeToken = await jwt.verify(token, "PriyanshiSecretKey")
+        const { _id } = decodeToken;
+        const user = await User.findById(_id);
+        if (!user) {
+            throw new Error ("User does not exists")
+        }
+        else {
+            res.send(user);
+        }
+    }
+    catch (err) {
+        res.status(400).send("Error: " + err.message);
     }
 })
 
