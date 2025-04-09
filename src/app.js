@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { isStrongPassword } = require('validator');
 const cookieParser = require('cookie-parser');
+const { userAuth } = require('./middlewares/auth')
 
 const app = express();  //instance of class express
 
@@ -42,11 +43,10 @@ app.post('/login', async (req, res) => {
         if (!user) {
             throw new Erron("Invalid credentials");
         }
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await validatePassword(password);
         if (isPasswordValid) {
             // creating a jwt token
-            // never harcode or push secret key to github 
-            const token = jwt.sign({_id: user._id}, "PriyanshiSecretKey",{expiresIn: "1h"})
+            const token = await  user.getJWT();
             console.log(token)
             // setting jwt token in cookies 
             res.cookie("token", token)
@@ -62,23 +62,10 @@ app.post('/login', async (req, res) => {
     }
 })
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth ,async (req, res) => {
     try {
-        const cookie = req.cookies;
-        // getting token from cookie 
-        const { token } = cookie;
-        if (!token) {
-            throw new Error ("Login to your account")
-        }
-        const decodeToken = await jwt.verify(token, "PriyanshiSecretKey")
-        const { _id } = decodeToken;
-        const user = await User.findById(_id);
-        if (!user) {
-            throw new Error ("User does not exists")
-        }
-        else {
-            res.send(user);
-        }
+        const user = req.user;
+        res.send(user);
     }
     catch (err) {
         res.status(400).send("Error: " + err.message);
