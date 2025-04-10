@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const { default: isURL } = require('validator/lib/isURL');
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -56,6 +57,34 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["male", "female", "other"],
     },
+    skills : {
+        type: [String],
+        validate: [
+            {
+                validator: function (arr) {
+                    return arr.length <= 10;
+                },
+                message: "You can add upto only 10 skills",
+            },
+            {
+                validator: function (arr) {
+                    return arr.every(skill => typeof skill === "string" && skill.trim() !== "")
+                },
+                message: "Skills can not be empty",
+            }
+        ],
+    },
+    photoURL: {
+        type: String,
+        default: "https://geographyandyou.com/images/user-profile.png",
+        validate: {
+            validator: function (url) {
+                return validator.isURL(url) 
+            },
+            message: "URL must be valid"
+        }
+    }
+    
 },
     {
         timestamps: true,
@@ -74,8 +103,7 @@ userSchema.methods.getJWT = async function () {
 userSchema.methods.validatePassword = async function (userInputPassword)
 {
     const user = this;
-    const isPasswordValid = await bcrypt.comapre(userInputPassword, user.password);
-
+    const isPasswordValid = await bcrypt.compare(userInputPassword, user.password);
     return isPasswordValid;
 }
 
