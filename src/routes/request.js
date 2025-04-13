@@ -57,5 +57,45 @@ router.post('/request/send/:status/:toUserId', userAuth, async (req, res) => {
     }
 })
 
+router.post('/request/review/:status/:requestId', userAuth, async (req, res) => {
+    try {
+        // loggedInUser is a fromUserId person 
+        const loggedInUser = req.user;
+        // toUserId person should be logged in as if 'a' sent request to 'b' , so 'b' has to be logged in to accept request of 'a' . and status must be interested then only b can either accept or reject the a's request.
+        const { status, requestId } = req.params;
+
+        const allowedStatus = ["accepted", "rejected"];
+        if (!allowedStatus.includes(status)) {
+            return res.status(404).json({
+                message: "Status is not valid",
+            })
+        }
+
+        const existRequest = await ConnectionRequest.findOne({
+            _id: requestId,
+            toUserId: loggedInUser._id,
+            status:"interested",
+        });
+         
+        if (!existRequest) {
+            return res.status(404).json({
+                message: "User not found",
+            })
+        }
+
+        existRequest.status = status;
+
+        const data = await existRequest.save();
+
+        res.json({
+            message: "Connection request is " + status,
+            data,
+        })
+
+    }
+    catch (err) {
+        res.status(400).send("Error: " + err.message);
+    }
+})
 
 module.exports = router;
