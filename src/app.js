@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const authRouter = require('./routes/auth')
 const profileRouter = require('./routes/profile')
 const connectionRequestRouter = require('./routes/request');
+const userRouter = require('./routes/user')
 
 const app = express();  //instance of class express
 
@@ -13,6 +14,7 @@ app.use(cookieParser());
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", connectionRequestRouter);
+app.use("/", userRouter);
 
 //best way to connect and start server is first to connect with database then start running server
 connectDB()
