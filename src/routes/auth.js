@@ -32,6 +32,35 @@ router.post('/signup', async (req, res) => {
 
 
 // login user 
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Login an existing user
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - emailId
+ *               - password
+ *             properties:
+ *               emailId:
+ *                 type: string
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 example: securePassword123
+ *     responses:
+ *       200:
+ *         description: Logged in successfully
+ *       400:
+ *         description: Invalid credentials or error
+ */
 router.post('/login', async (req, res) => {
     try {
         const { emailId, password } = req.body;

@@ -5,11 +5,13 @@ const authRouter = require('./routes/auth')
 const profileRouter = require('./routes/profile')
 const connectionRequestRouter = require('./routes/request');
 const userRouter = require('./routes/user')
-
+const { swaggerUi, swaggerSpec} = require('../swagger')
 const app = express();  //instance of class express
+
 
 app.use(express.json());
 app.use(cookieParser());
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
