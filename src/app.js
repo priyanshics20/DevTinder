@@ -5,10 +5,15 @@ const authRouter = require('./routes/auth')
 const profileRouter = require('./routes/profile')
 const connectionRequestRouter = require('./routes/request');
 const userRouter = require('./routes/user')
-const { swaggerUi, swaggerSpec} = require('../swagger')
+const { swaggerUi, swaggerSpec } = require('../swagger')
+const cors = require('cors');
+
 const app = express();  //instance of class express
 
-
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,  //for setting up cookies inside browser
+}))
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

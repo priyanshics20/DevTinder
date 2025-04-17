@@ -75,15 +75,17 @@ router.post('/login', async (req, res) => {
             // console.log(token)
             // setting jwt token in cookies 
             res.cookie("token", token)
-            
-            res.send("LoggedIn Successfully");
+            res.json({
+                message: "User loggedin successfully",
+                data : user,
+            });
         }
         else {
             throw new Error("Invalid credentials");
         }    
     }
     catch (err) {
-        res.status(400).send("Error " + err.message); 
+        res.status(400).json("Error " + err.message); 
     }
 })
 
