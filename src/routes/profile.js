@@ -20,8 +20,8 @@ router.get("/profile/view", userAuth ,async (req, res) => {
         res.status(400).send("Error: " + err.message);
     }
 })
-
-router.patch("/profile/edit", userAuth ,async (req, res) => {
+// patch api was not working at client side (due to some cors issue)
+router.put("/profile/edit", userAuth, async (req, res) => {
     try {
         // validate the fields
         if (!validateEditProfileData(req)) {

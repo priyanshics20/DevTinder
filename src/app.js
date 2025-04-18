@@ -11,7 +11,7 @@ const cors = require('cors');
 const app = express();  //instance of class express
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "*",
     credentials: true,  //for setting up cookies inside browser
 }))
 app.use(express.json());
