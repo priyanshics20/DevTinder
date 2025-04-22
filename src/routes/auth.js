@@ -22,8 +22,12 @@ router.post('/signup', async (req, res) => {
 
         // const user = new User(req.body)
         const user = new User({firstName:firstName, emailId:emailId , password: passwordHash , ...optionalFields });
-        await user.save();
-        res.send("User added Successfully");
+        const savedUser = await user.save();
+        const token = await savedUser.getJWT();
+
+        res.cookie("token", token);
+
+        res.json({ message: "User added Successfully", data : savedUser});
     }
     catch (err) {
         res.status(400).send("error saving the user" + err.message);
